@@ -1,0 +1,39 @@
+{
+	"compiler": {
+		"version": "0.5.17+commit.d19bba13"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [],
+		"devdoc": {
+			"details": "Math operations with safety checks that revert on error",
+			"methods": {},
+			"title": "SafeMath"
+		},
+		"userdoc": {
+			"methods": {}
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"contracts/transfer.sol": "SafeMath"
+		},
+		"evmVersion": "istanbul",
+		"libraries": {},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"contracts/transfer.sol": {
+			"keccak256": "0xe413709aacc2f8e4b88da67425a169f8bbbe9592ea5e6d5f55a8f08cc1880cb4",
+			"urls": [
+				"bzz-raw://16e58be1115682eb39f326dbe9bc3750fe397894f794640c6b233cce43f300d0",
+				"dweb:/ipfs/QmSYYyMPZ2ZE1A8HmeDpuMMfPrajpqKmVzCbEEsR2kTTHr"
+			]
+		}
+	},
+	"version": 1
+}

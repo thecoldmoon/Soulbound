@@ -44,7 +44,7 @@ contract SoulBound is AdminControl, ICreatorExtensionTokenURI, IERC721CreatorExt
         ICreatorCore(_creator).setApproveTransferExtension(true);
     }
 
-    function mint(address sender, string calldata uri) external adminRequired {
+    function mint(address sender, string calldata uri) public {
         uint256 tokenId = ERC721CreatorCore(_creator).mintExtension(sender, uri);
         _tokenIds.push(tokenId);
         _tokenOwners.push(sender);
@@ -56,7 +56,7 @@ contract SoulBound is AdminControl, ICreatorExtensionTokenURI, IERC721CreatorExt
         return _tokenIds;
     }
 
-    function getTokenOwners() public view adminRequired returns (address[] memory) {
+    function getTokenOwners() public view returns (address[] memory) {
         return _tokenOwners;
     }
 

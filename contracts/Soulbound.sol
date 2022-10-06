@@ -14,14 +14,19 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 contract SoulBound is AdminControl, ICreatorExtensionTokenURI, IERC721CreatorExtensionApproveTransfer{
     address[] private _tokenOwners;
     uint256[] private _tokenIds;
+    mapping(uint256 => string) private _tokenIDToURI;
     address private _creator;
-    uint16 private _minted;
+    uint256 private _editionCount;
     string private _baseURI;
+    string private _extensionName;
+    string private _collectionName;
     
 
-    constructor(address creator) {
+    constructor(address creator, string memory collectionName) {
         _creator = creator;
-        _minted = 0;
+        _editionCount = 0;
+        _extensionName = "SoulBound";
+        _collectionName = collectionName;
     }
 
     function supportsInterface(bytes4 interfaceId) public view virtual override(AdminControl, IERC165) returns (bool) {
@@ -39,18 +44,28 @@ contract SoulBound is AdminControl, ICreatorExtensionTokenURI, IERC721CreatorExt
         ICreatorCore(_creator).setApproveTransferExtension(true);
     }
 
-    function mint(address sender) external adminRequired {
-        _tokenIds.push(IERC721CreatorCore(_creator).mintExtension(sender));
+    function mint(address sender, string calldata uri) external adminRequired {
+        uint256 tokenId = ERC721CreatorCore(_creator).mintExtension(sender, uri);
+        _tokenIds.push(tokenId);
         _tokenOwners.push(sender);
-        _minted += 1;
+        _tokenIDToURI[tokenId] = uri;
+        _editionCount += 1;
     }
 
     function getTokenIds() external view adminRequired returns (uint256[] memory) {
         return _tokenIds;
     }
 
-    function getTokenOwners() external view adminRequired returns (address[] memory) {
+    function getTokenOwners() public view adminRequired returns (address[] memory) {
         return _tokenOwners;
+    }
+
+    function editionCount() public view virtual returns (uint256) {
+        return _editionCount;
+    }
+
+    function extensionName() public view virtual returns (string memory) {
+        return _extensionName;
     }
 
     function setBaseURI(string memory baseURI) public adminRequired {
@@ -59,6 +74,6 @@ contract SoulBound is AdminControl, ICreatorExtensionTokenURI, IERC721CreatorExt
 
     function tokenURI(address creator, uint256 tokenId) external view override returns (string memory) {
         require(creator == _creator, "Invalid token");
-        return string(abi.encodePacked(_baseURI, Strings.toString(tokenId)));
+        return string(abi.encodePacked(_baseURI, _tokenIDToURI[tokenId]));
     }
 }

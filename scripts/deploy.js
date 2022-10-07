@@ -26,7 +26,7 @@ async function main() {
 
   console.log("Deploying the contract to the network:", network.name);
   console.log("Contract deploying:", "Soulbound")
-  const Soulbound = await ethers.getContractFactory("SoulBound");
+  const Soulbound = await ethers.getContractFactory("SoulBound", "chickens");
   const soulbound = await Soulbound.deploy(creatorAddress);
   await soulbound.deployed();
 

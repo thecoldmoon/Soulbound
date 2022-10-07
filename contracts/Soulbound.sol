@@ -22,11 +22,12 @@ contract SoulBound is AdminControl, ICreatorExtensionTokenURI, IERC721CreatorExt
     string private _collectionName;
     
 
-    constructor(address creator, string memory collectionName) {
+    constructor(address creator, string memory collectionTitle) {
+        require(keccak256(abi.encodePacked(collectionTitle)) != keccak256(abi.encodePacked("")), "Invalid Collection Name");
         _creator = creator;
         _editionCount = 0;
         _extensionName = "SoulBound";
-        _collectionName = collectionName;
+        _collectionName = collectionTitle;
     }
 
     function supportsInterface(bytes4 interfaceId) public view virtual override(AdminControl, IERC165) returns (bool) {
@@ -35,7 +36,7 @@ contract SoulBound is AdminControl, ICreatorExtensionTokenURI, IERC721CreatorExt
 
     function approveTransfer(address from, address to, uint256 tokenId) public override returns (bool){
         require(msg.sender == _creator, "This token is soulbound");
-        require(from == 0x0000000000000000000000000000000000000000, "This token is soulbound");
+        require(from == address(0), "This token is soulbound");
         
         return true;
     }
@@ -52,12 +53,16 @@ contract SoulBound is AdminControl, ICreatorExtensionTokenURI, IERC721CreatorExt
         _editionCount += 1;
     }
 
-    function getTokenIds() external view adminRequired returns (uint256[] memory) {
+    function getTokenIds() public view adminRequired returns (uint256[] memory) {
         return _tokenIds;
     }
 
     function getTokenOwners() public view returns (address[] memory) {
         return _tokenOwners;
+    }
+
+    function collectionName() public view returns (string memory) {
+        return _collectionName;
     }
 
     function editionCount() public view virtual returns (uint256) {

@@ -1,7 +1,8 @@
 {
   "dependencies": {
     "@manifoldxyz/creator-core-solidity": "^1.0.4",
-    "@remix-project/remixd": "^0.6.6"
+    "@remix-project/remixd": "^0.6.6",
+    "bignumber.js": "^9.1.0"
   },
   "devDependencies": {
     "@babel/plugin-proposal-nullish-coalescing-operator": "^7.18.6",

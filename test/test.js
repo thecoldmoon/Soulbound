@@ -32,7 +32,7 @@ describe("Soulbound Contract", function () {
     // CREATE SOULBOUND CONTRACT
     const SBtoken = await ethers.getContractFactory("SoulBound");
     const [soulBoundOwner, addr3, addr4] = await ethers.getSigners();
-    const soulBoundToken = await SBtoken.deploy(creatorToken.address, "Cheddar Cheese");
+    const soulBoundToken = await SBtoken.deploy(creatorToken.address);
 
     await soulBoundToken.deployed();
 
@@ -59,26 +59,23 @@ describe("Soulbound Contract", function () {
       const extensionsAvailable = await creatorToken.getExtensions()
 
       expect(extensionsAvailable[0]).to.equal(soulBoundToken.address);
+      expect(await soulBoundToken.supportsInterface(0x736f756c)).to.equal(true);
+      expect(await creatorToken.supportsInterface(0x736f756c)).to.equal(false);
     });
-    it("Unnamed Extension: Throw Error", async function () {
-      const Token = await ethers.getContractFactory("TUTORIAL3");
-      const [creatorOwner, addr1, addr2] = await ethers.getSigners();
-      const creatorToken = await Token.deploy();
-
-      await creatorToken.deployed();
-      console.log("Creator Contract deployed to:", creatorToken.address);
-
-      // CREATE SOULBOUND CONTRACT
-      const SBtoken = await ethers.getContractFactory("SoulBound");
-      await expect(SBtoken.deploy(creatorToken.address, "")).to.be.revertedWith("Invalid Collection Name");
+    it("Unnamed Collection: Throw Error", async function () {
+      const { creatorToken, creatorOwner, soulBoundToken, addr1, addr2} = await loadFixture(deployExtensionFixture);
+      
+      // The test below fails despite having the same reverted reason string
+      await expect(await soulBoundToken.mint('', creatorOwner.address, '000000000000000000000001')).to.be.revertedWith('Invalid Collection name');
 
 
     });
-    it("Named Extension: Check extension, collection name construction", async function () {
-      const { creatorToken, creatorOwner, soulBoundToken, addr1, addr2} = await loadFixture(deployCreatorFixture);
-
-      expect(await soulBoundToken.extensionName()).to.equal('SoulBound');
-      expect(await soulBoundToken.collectionName()).to.equal('Cheddar Cheese');
+    it("Named Collection: Check collection name", async function () {
+      const { creatorToken, creatorOwner, soulBoundToken, addr1, addr2} = await loadFixture(deployExtensionFixture);
+      const id = await soulBoundToken.mint('Cheddar Cheese', creatorOwner.address, '000000000000000000000001');
+      const collectionNames = ['Cheddar Cheese'];
+      expect(await soulBoundToken.getCollections()).to.eql(collectionNames);
+      expect(await soulBoundToken.editionCountByCollectionName('Cheddar Cheese')).to.equal(1);
     });
   });
 
@@ -87,12 +84,12 @@ describe("Soulbound Contract", function () {
 
     it("Creator mints token", async function () {
       const { creatorToken, creatorOwner, soulBoundToken, addr1, addr2} = await loadFixture(deployExtensionFixture);
-      const id = await soulBoundToken.mint(creatorOwner.address, '000000000000000000000001');
+      const id = await soulBoundToken.mint('test', creatorOwner.address, '000000000000000000000001');
       expect(await creatorToken['ownerOf(uint256)'](1)).to.equal(creatorOwner.address)
     });
     it("Try to transfer token: Throw Error", async function () {
       const { creatorToken, creatorOwner, soulBoundToken, addr1, addr2} = await loadFixture(deployExtensionFixture);
-      await soulBoundToken.mint(creatorOwner.address, '000000000000000000000003');
+      await soulBoundToken.mint('test', creatorOwner.address, '000000000000000000000003');
       await expect(creatorToken['safeTransferFrom(address,address,uint256)'](creatorOwner.address, addr1.address, 1)).to.be.revertedWith('This token is soulbound');
 
       expect(await creatorToken['ownerOf(uint256)'](1)).to.equal(creatorOwner.address)
@@ -100,9 +97,9 @@ describe("Soulbound Contract", function () {
     it("Create multiple tokens, check token owners", async function () {
       const { creatorToken, creatorOwner, soulBoundToken, addr1, addr2} = await loadFixture(deployExtensionFixture);
 
-      await soulBoundToken.mint(creatorOwner.address, '000000000000000000000001');
-      await soulBoundToken.mint(addr1.address, '00000000000000002');
-      await soulBoundToken.mint(addr2.address, '000000000000000000000003');
+      await soulBoundToken.mint('test', creatorOwner.address, '000000000000000000000001');
+      await soulBoundToken.mint('test', addr1.address, '00000000000000002');
+      await soulBoundToken.mint('test', addr2.address, '000000000000000000000003');
 
       expect(await creatorToken['ownerOf(uint256)'](1)).to.equal(creatorOwner.address)
       expect(await creatorToken['ownerOf(uint256)'](2)).to.equal(addr1.address)
@@ -117,10 +114,10 @@ describe("Soulbound Contract", function () {
     it("Extension with minted tokens: Get Edition Count, tokenIds, tokenowners", async function () {
       const { creatorToken, creatorOwner, soulBoundToken, addr1, addr2} = await loadFixture(deployExtensionFixture);
 
-      const id1 = await soulBoundToken.mint(creatorOwner.address, '000000000000000000000001');
-      const id2 = await soulBoundToken.mint(addr1.address, '00000000000000002');
-      const id3 = await soulBoundToken.mint(addr2.address, '000000000000000000000003');
-      expect(await soulBoundToken['editionCount()']()).to.equal(3);
+      const id1 = await soulBoundToken.mint('test', creatorOwner.address, '000000000000000000000001');
+      const id2 = await soulBoundToken.mint('test', addr1.address, '00000000000000002');
+      const id3 = await soulBoundToken.mint('test', addr2.address, '000000000000000000000003');
+      expect(await soulBoundToken.editionCountByCollectionName('test')).to.equal(3);
       expect(await creatorToken['ownerOf(uint256)'](1)).to.equal(creatorOwner.address)
       expect(await creatorToken['ownerOf(uint256)'](2)).to.equal(addr1.address)
 
@@ -132,22 +129,37 @@ describe("Soulbound Contract", function () {
 
       const addresses = [creatorOwner.address, addr1.address, addr2.address]
       expect(await soulBoundToken.getTokenOwners()).to.eql(addresses)
+      expect(await soulBoundToken.editionCountByCollectionName('test')).to.equal(3);
 
     });
     it("Extension with no minted tokens: Get Edition Count, tokenIds, tokenowners", async function () {
       const { creatorToken, creatorOwner, soulBoundToken, addr1, addr2} = await loadFixture(deployExtensionFixture);
 
-      expect(await soulBoundToken.editionCount()).to.equal(0)
+      expect(await soulBoundToken.editionCountByCollectionName('test')).to.equal(0)
       expect(await soulBoundToken['getTokenIds()']()).to.eql([])
       expect(await soulBoundToken.getTokenOwners()).to.eql([])
+
+    });
+    it("Multiple collections: Verify Edition Count, Collection Names", async function () {
+      const { creatorToken, creatorOwner, soulBoundToken, addr1, addr2} = await loadFixture(deployExtensionFixture);
+
+      const id1 = await soulBoundToken.mint("test", creatorOwner.address, '000000000000000000000001');
+      const id2 = await soulBoundToken.mint("test1", addr1.address, '00000000000000002');
+      const id3 = await soulBoundToken.mint("test2", addr2.address, '000000000000000000000003');
+      
+      expect(await soulBoundToken.editionCountByCollectionName('test')).to.equal(1)
+      expect(await soulBoundToken.editionCountByCollectionName('test1')).to.equal(1)
+      expect(await soulBoundToken.editionCountByCollectionName('test2')).to.equal(1)
+      const collectionName = ['test', 'test1', 'test2'];
+      expect(await soulBoundToken.getCollections()).to.eql(collectionName)
 
     });
     it("Verify URI", async function () {
       const { creatorToken, creatorOwner, soulBoundToken, addr1, addr2} = await loadFixture(deployExtensionFixture);
 
-      const id1 = await soulBoundToken.mint(creatorOwner.address, '000000000000000000000001');
-      const id2 = await soulBoundToken.mint(addr1.address, '00000000000000002');
-      const id3 = await soulBoundToken.mint(addr2.address, '000000000000000000000003');
+      const id1 = await soulBoundToken.mint("test", creatorOwner.address, '000000000000000000000001');
+      const id2 = await soulBoundToken.mint("test", addr1.address, '00000000000000002');
+      const id3 = await soulBoundToken.mint("test", addr2.address, '000000000000000000000003');
       await soulBoundToken.setBaseURI('www.cheddar.com/')
       const tokenIds = await soulBoundToken.getTokenIds();
       expect(await soulBoundToken.tokenURI(creatorToken.address, tokenIds[0])).to.eql('www.cheddar.com/000000000000000000000001')

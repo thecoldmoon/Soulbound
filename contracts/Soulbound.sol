@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@manifoldxyz/libraries-solidity/contracts/access/AdminControl.sol";
 import "@manifoldxyz/creator-core-solidity/contracts/ERC721Creator.sol";
+import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@manifoldxyz/creator-core-solidity/contracts/extensions/ERC721/IERC721CreatorExtensionApproveTransfer.sol";
 import "@manifoldxyz/creator-core-solidity/contracts/core/IERC721CreatorCore.sol";
 import "@manifoldxyz/creator-core-solidity/contracts/extensions/ICreatorExtensionTokenURI.sol";
@@ -11,27 +13,24 @@ import "hardhat/console.sol";
 
 import "@openzeppelin/contracts/utils/Strings.sol";
 
-contract SoulBound is AdminControl, ICreatorExtensionTokenURI, IERC721CreatorExtensionApproveTransfer{
-    address[] private _tokenOwners;
+contract SoulBound is AdminControl, ReentrancyGuard, ICreatorExtensionTokenURI, IERC721CreatorExtensionApproveTransfer{
+    using EnumerableSet for EnumerableSet.AddressSet;
     uint256[] private _tokenIds;
+    string[] private _collections;
     mapping(uint256 => string) private _tokenIDToURI;
+    mapping(string => uint32) private _collectionToEdition;
+    mapping(string => EnumerableSet.AddressSet) private _collectionOwners;
     address private _creator;
-    uint256 private _editionCount;
     string private _baseURI;
-    string private _extensionName;
-    string private _collectionName;
+    bytes4 private _soulId = 0x736f756c;
     
 
-    constructor(address creator, string memory collectionTitle) {
-        require(keccak256(abi.encodePacked(collectionTitle)) != keccak256(abi.encodePacked("")), "Invalid Collection Name");
+    constructor(address creator) {
         _creator = creator;
-        _editionCount = 0;
-        _extensionName = "SoulBound";
-        _collectionName = collectionTitle;
     }
 
     function supportsInterface(bytes4 interfaceId) public view virtual override(AdminControl, IERC165) returns (bool) {
-        return interfaceId == type(ICreatorExtensionTokenURI).interfaceId || interfaceId == type(IERC721CreatorExtensionApproveTransfer).interfaceId || AdminControl.supportsInterface(interfaceId) || super.supportsInterface(interfaceId);
+        return interfaceId == _soulId || interfaceId == type(ICreatorExtensionTokenURI).interfaceId || interfaceId == type(IERC721CreatorExtensionApproveTransfer).interfaceId || AdminControl.supportsInterface(interfaceId) || super.supportsInterface(interfaceId);
     }
 
     function approveTransfer(address from, address to, uint256 tokenId) public override returns (bool){
@@ -45,35 +44,42 @@ contract SoulBound is AdminControl, ICreatorExtensionTokenURI, IERC721CreatorExt
         ICreatorCore(_creator).setApproveTransferExtension(true);
     }
 
-    function mint(address sender, string calldata uri) public {
+    function mint(string memory collectionName, address sender, string calldata uri) public nonReentrant {
+        require((keccak256(abi.encodePacked(collectionName)) != keccak256(abi.encodePacked(""))), "Invalid Collection Name");
         uint256 tokenId = ERC721CreatorCore(_creator).mintExtension(sender, uri);
+        
         _tokenIds.push(tokenId);
-        _tokenOwners.push(sender);
+        _collectionOwners[collectionName].add(sender);
         _tokenIDToURI[tokenId] = uri;
-        _editionCount += 1;
+        
+        if (_collectionToEdition[collectionName] == 0){
+        _collections.push(collectionName);
+        }
+        _collectionToEdition[collectionName] += 1;
     }
 
-    function getTokenIds() public view adminRequired returns (uint256[] memory) {
+    function getTokenIds() public view adminRequired returns (uint256[] memory tokenIds) {
+        tokenIds = new uint256[](_tokenIds.length);
+        for (uint i = 0; i < _tokenIds.length; i++) {
+            tokenIds[i] = _tokenIds[i];
+        }
         return _tokenIds;
     }
 
-    function getTokenOwners() public view returns (address[] memory) {
-        return _tokenOwners;
+    function getTokenOwnersForCollection(string memory collectionName) public view adminRequired returns (address[] memory tokenOwners) {
+        tokenOwners = new address[](_collectionOwners[collectionName].length());
+        for (uint i = 0; i < _collectionOwners[collectionName].length(); i++) {
+            tokenOwners[i] = _collectionOwners[collectionName].at(i);
+        }
+        return tokenOwners;
     }
 
-    function collectionName() public view returns (string memory) {
-        return _collectionName;
-    }
-
-    function editionCount() public view virtual returns (uint256) {
-        return _editionCount;
-    }
-
-    function extensionName() public view virtual returns (string memory) {
-        return _extensionName;
+    function editionCountByCollectionName(string memory collectionName) external view returns (uint256) {
+        return _collectionToEdition[collectionName];
     }
 
     function setBaseURI(string memory baseURI) public adminRequired {
+        ERC721CreatorCore(_creator).setBaseTokenURIExtension(baseURI);
         _baseURI = baseURI;
     }
 

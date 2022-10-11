@@ -1,6 +1,6 @@
 {
 	"compiler": {
-		"version": "0.8.17+commit.8df45f5f"
+		"version": "0.8.7+commit.e28d00a7"
 	},
 	"language": "Solidity",
 	"output": {
@@ -116,6 +116,25 @@
 				"type": "function"
 			},
 			{
+				"inputs": [
+					{
+						"internalType": "string",
+						"name": "collectionName",
+						"type": "string"
+					}
+				],
+				"name": "editionCountByCollectionName",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
 				"inputs": [],
 				"name": "getAdmins",
 				"outputs": [
@@ -130,11 +149,24 @@
 			},
 			{
 				"inputs": [],
+				"name": "getCollections",
+				"outputs": [
+					{
+						"internalType": "string[]",
+						"name": "collections",
+						"type": "string[]"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
 				"name": "getTokenIds",
 				"outputs": [
 					{
 						"internalType": "uint256[]",
-						"name": "",
+						"name": "tokenIds",
 						"type": "uint256[]"
 					}
 				],
@@ -147,7 +179,7 @@
 				"outputs": [
 					{
 						"internalType": "address[]",
-						"name": "",
+						"name": "tokenOwners",
 						"type": "address[]"
 					}
 				],
@@ -176,9 +208,19 @@
 			{
 				"inputs": [
 					{
+						"internalType": "string",
+						"name": "collectionName",
+						"type": "string"
+					},
+					{
 						"internalType": "address",
 						"name": "sender",
 						"type": "address"
+					},
+					{
+						"internalType": "string",
+						"name": "uri",
+						"type": "string"
 					}
 				],
 				"name": "mint",
@@ -567,11 +609,11 @@
 			]
 		},
 		"contracts/Soulbound.sol": {
-			"keccak256": "0x85e19341f31a19ebdf82f1088abe686b8eb16b0f98b1bc313c91bbf6bdcac60e",
+			"keccak256": "0x806917ea79109de20d9cfcf74d906e854efc532d8ffb37103a6575645235cba0",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://3e1614ef84823f2b8b9d576e8d0ee39191a2dd868c76e8f62bc4a81ce6b315ef",
-				"dweb:/ipfs/Qmcr2HajVtNed6hzPwb46x2P6x5rD2XHQ2KEWxjPMFVntY"
+				"bzz-raw://a555e3a6cf09d26581967a684f5eddd6816ce9c522ab779df9cd5382dbf58cda",
+				"dweb:/ipfs/QmZpQGyNQnL6Ahag5JeUknzyaJBDTW8e36wotkELth6wXz"
 			]
 		},
 		"hardhat/console.sol": {

@@ -153,8 +153,13 @@
 				"outputs": [
 					{
 						"internalType": "string[]",
-						"name": "collections",
+						"name": "collectionNames",
 						"type": "string[]"
+					},
+					{
+						"internalType": "uint32[]",
+						"name": "editionNumbers",
+						"type": "uint32[]"
 					}
 				],
 				"stateMutability": "view",
@@ -174,8 +179,14 @@
 				"type": "function"
 			},
 			{
-				"inputs": [],
-				"name": "getTokenOwners",
+				"inputs": [
+					{
+						"internalType": "string",
+						"name": "collectionName",
+						"type": "string"
+					}
+				],
+				"name": "getTokenOwnersForCollection",
 				"outputs": [
 					{
 						"internalType": "address[]",
@@ -384,11 +395,7 @@
 		},
 		"userdoc": {
 			"kind": "user",
-			"methods": {
-				"tokenURI(address,uint256)": {
-					"notice": "Get the uri for a given creator/tokenId"
-				}
-			},
+			"methods": {},
 			"version": 1
 		}
 	},
@@ -608,12 +615,20 @@
 				"dweb:/ipfs/QmUqurVVnCc7XkMxb2k23TVQUtuhHZduJ3hTZarTJrqU24"
 			]
 		},
-		"contracts/Soulbound.sol": {
-			"keccak256": "0x806917ea79109de20d9cfcf74d906e854efc532d8ffb37103a6575645235cba0",
+		"contracts/ISoulbound.sol": {
+			"keccak256": "0x2a3995be89971b4e121a64c217147ff7bd8241de1b8a866f31b57a9a848d8edb",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://a555e3a6cf09d26581967a684f5eddd6816ce9c522ab779df9cd5382dbf58cda",
-				"dweb:/ipfs/QmZpQGyNQnL6Ahag5JeUknzyaJBDTW8e36wotkELth6wXz"
+				"bzz-raw://5f0d57db6c80e3b99e7cac6db141c62331db357678f68755c1b992a618ebad1a",
+				"dweb:/ipfs/Qmb3DCCoMwhxjTkFmqW9ePSoMGJua79Vxx4HtqAGzr7xqj"
+			]
+		},
+		"contracts/Soulbound.sol": {
+			"keccak256": "0x1b23147b66464aa1d4e57a24e4d6c4bcb124d678909793189688401064ffc94b",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://400441c1d1833600340c0a36258deb87c93ed338ab904143a2e241ea5a93bd71",
+				"dweb:/ipfs/QmUX3qgsy97NXDKnnrJnfm9azwdevm4uGLjhh2tA36NRhf"
 			]
 		},
 		"hardhat/console.sol": {

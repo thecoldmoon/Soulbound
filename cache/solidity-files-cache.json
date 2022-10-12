@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "/Users/lululiu/Documents/To Do/Soulbound/contracts/Soulbound.sol": {
-      "lastModificationDate": 1665347084894,
-      "contentHash": "d406fbaac7b88c132fa253b4c3e389b2",
+      "lastModificationDate": 1665595880307,
+      "contentHash": "5575a01dc1b3d2cd923cbe1349f55aa0",
       "sourceName": "contracts/Soulbound.sol",
       "solcConfig": {
         "version": "0.8.7",
@@ -32,11 +32,13 @@
         "@openzeppelin/contracts/security/ReentrancyGuard.sol",
         "@manifoldxyz/libraries-solidity/contracts/access/AdminControl.sol",
         "@manifoldxyz/creator-core-solidity/contracts/ERC721Creator.sol",
+        "@openzeppelin/contracts/utils/structs/EnumerableSet.sol",
         "@manifoldxyz/creator-core-solidity/contracts/extensions/ERC721/IERC721CreatorExtensionApproveTransfer.sol",
         "@manifoldxyz/creator-core-solidity/contracts/core/IERC721CreatorCore.sol",
         "@manifoldxyz/creator-core-solidity/contracts/extensions/ICreatorExtensionTokenURI.sol",
         "@manifoldxyz/creator-core-solidity/contracts/core/ICreatorCore.sol",
         "hardhat/console.sol",
+        "contracts/ISoulbound.sol",
         "@openzeppelin/contracts/utils/Strings.sol"
       ],
       "versionPragmas": [
@@ -1051,8 +1053,8 @@
       ]
     },
     "/Users/lululiu/Documents/To Do/Soulbound/contracts/ISoulbound.sol": {
-      "lastModificationDate": 1665279495870,
-      "contentHash": "2a64c3fbf2d12c98476e7c86ad514bcd",
+      "lastModificationDate": 1665592242453,
+      "contentHash": "0f96920d77e0303d2f8cfa82b1736d95",
       "sourceName": "contracts/ISoulbound.sol",
       "solcConfig": {
         "version": "0.8.7",
@@ -1077,14 +1079,12 @@
           }
         }
       },
-      "imports": [
-        "./Soulbound.sol"
-      ],
+      "imports": [],
       "versionPragmas": [
         "^0.8.0"
       ],
       "artifacts": [
-        "SOULBOUND"
+        "ISoulbound"
       ]
     }
   }

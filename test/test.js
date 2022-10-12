@@ -1,29 +1,12 @@
 const { expect } = require("chai");
 const BigNumber = require('bignumber.js');
-// We use `loadFixture` to share common setups (or fixtures) between tests.
-// Using this simplifies your tests and makes them run faster, by taking
-// advantage or Hardhat Network's snapshot functionality.
 const { loadFixture } = require("@nomicfoundation/hardhat-network-helpers");
 
-// `describe` is a Mocha function that allows you to organize your tests.
-// Having your tests organized makes debugging them easier. All Mocha
-// functions are available in the global scope.
-//
-// `describe` receives the name of a section of your test suite, and a
-// callback. The callback must define the tests of that section. This callback
-// can't be an async function.
 describe("Soulbound Contract", function () {
-  // We define a fixture to reuse the same setup in every test. We use
-  // loadFixture to run this setup once, snapshot that state, and reset Hardhat
-  // Network to that snapshot in every test.
   async function deployCreatorFixture() {
     // CREATE A CREATOR CONTRACT
     const Token = await ethers.getContractFactory("TUTORIAL3");
     const [creatorOwner, addr1, addr2] = await ethers.getSigners();
-
-    // To deploy our contract, we just have to call Token.deploy() and await
-    // for it to be deployed(), which happens onces its transaction has been
-    // mined.
     const creatorToken = await Token.deploy();
 
     await creatorToken.deployed();
@@ -59,8 +42,8 @@ describe("Soulbound Contract", function () {
       const extensionsAvailable = await creatorToken.getExtensions()
 
       expect(extensionsAvailable[0]).to.equal(soulBoundToken.address);
-      expect(await soulBoundToken.supportsInterface(0x736f756c)).to.equal(true);
-      expect(await creatorToken.supportsInterface(0x736f756c)).to.equal(false);
+      expect(await soulBoundToken.supportsInterface(0x54bd1f8f)).to.equal(true);
+      expect(await creatorToken.supportsInterface(0x54bd1f8f)).to.equal(false);
     });
     it("Unnamed Collection: Throw Error", async function () {
       const { creatorToken, creatorOwner, soulBoundToken, addr1, addr2} = await loadFixture(deployExtensionFixture);
@@ -74,7 +57,8 @@ describe("Soulbound Contract", function () {
       const { creatorToken, creatorOwner, soulBoundToken, addr1, addr2} = await loadFixture(deployExtensionFixture);
       const id = await soulBoundToken.mint('Cheddar Cheese', creatorOwner.address, '000000000000000000000001');
       const collectionNames = ['Cheddar Cheese'];
-      expect(await soulBoundToken.getCollections()).to.eql(collectionNames);
+      const collectionEditions = [1];
+      expect(await soulBoundToken.getCollections()).to.eql([collectionNames, collectionEditions]);
       expect(await soulBoundToken.editionCountByCollectionName('Cheddar Cheese')).to.equal(1);
     });
   });
@@ -128,7 +112,7 @@ describe("Soulbound Contract", function () {
       expect(tokens).to.eql(ids);
 
       const addresses = [creatorOwner.address, addr1.address, addr2.address]
-      expect(await soulBoundToken.getTokenOwners()).to.eql(addresses)
+      expect(await soulBoundToken.getTokenOwnersForCollection('test')).to.eql(addresses);
       expect(await soulBoundToken.editionCountByCollectionName('test')).to.equal(3);
 
     });
@@ -137,7 +121,8 @@ describe("Soulbound Contract", function () {
 
       expect(await soulBoundToken.editionCountByCollectionName('test')).to.equal(0)
       expect(await soulBoundToken['getTokenIds()']()).to.eql([])
-      expect(await soulBoundToken.getTokenOwners()).to.eql([])
+      expect(await soulBoundToken.getTokenOwnersForCollection('test')).to.eql([])
+      expect(await soulBoundToken.getCollections()).to.eql([[], []]);
 
     });
     it("Multiple collections: Verify Edition Count, Collection Names", async function () {
@@ -151,7 +136,7 @@ describe("Soulbound Contract", function () {
       expect(await soulBoundToken.editionCountByCollectionName('test1')).to.equal(1)
       expect(await soulBoundToken.editionCountByCollectionName('test2')).to.equal(1)
       const collectionName = ['test', 'test1', 'test2'];
-      expect(await soulBoundToken.getCollections()).to.eql(collectionName)
+      expect(await soulBoundToken.getCollections()).to.eql([collectionName, [1, 1, 1]]);
 
     });
     it("Verify URI", async function () {
